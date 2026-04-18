@@ -1,11 +1,16 @@
-from device import load_config
-from api import send_attendance
-from attendance.rfid import read_card
 import time
 
-config = load_config()
+from api import send_attendance
+from attendance.rfid import read_card
+from device import load_config
 
-print("🚀 Device started:", config["device_id"])
+try:
+    config = load_config()
+except Exception as e:
+    print("Startup error:", e)
+    raise SystemExit(1)
+
+print("🚀 Device started:", config.get("device_id", "UNKNOWN_DEVICE"))
 
 while True:
     try:

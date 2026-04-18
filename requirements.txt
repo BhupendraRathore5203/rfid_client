@@ -2,3 +2,5 @@ requests
 pyscard
 opencv-python
 numpy
+psutil
+pyudev; platform_system == "Linux"
