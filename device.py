@@ -140,13 +140,65 @@ def get_usb_devices():
 
     for device in context.list_devices(subsystem='usb'):
         if device.device_type == 'usb_device':
+            def _sysfs_attr(dev, key):
+                try:
+                    val = dev.attributes.get(key)
+                except Exception:
+                    return None
+
+                if val is None:
+                    return None
+
+                if isinstance(val, (bytes, bytearray)):
+                    return val.decode(errors="ignore").strip()
+
+                return str(val).strip()
+
+            def _first_nonempty(*values):
+                for v in values:
+                    if v is None:
+                        continue
+                    s = str(v).strip()
+                    if s:
+                        return s
+                return None
+
+            vendor_id = _first_nonempty(device.get("ID_VENDOR_ID"), _sysfs_attr(device, "idVendor"))
+            product_id = _first_nonempty(device.get("ID_MODEL_ID"), _sysfs_attr(device, "idProduct"))
+            serial = _first_nonempty(
+                device.get("ID_SERIAL_SHORT"),
+                device.get("ID_SERIAL"),
+                _sysfs_attr(device, "serial"),
+            )
+            path = _first_nonempty(
+                device.get("ID_PATH_TAG"),
+                device.get("ID_PATH"),
+                device.get("DEVPATH"),
+                device.sys_name,
+            )
+
+            if serial:
+                identifier = f"usb:{vendor_id or 'unknown'}:{product_id or 'unknown'}:sn:{serial}"
+            else:
+                # Note: do NOT use device.device_node (/dev/bus/usb/...) because it changes on reconnect.
+                identifier = f"usb:{vendor_id or 'unknown'}:{product_id or 'unknown'}:path:{path or device.sys_name}"
+
             devices.append({
-                "name": device.get('ID_MODEL', 'USB Device'),
-                "type": "RFID",  # you can improve detection later
-                "identifier": device.device_node or device.sys_name
+                "name": _first_nonempty(device.get("ID_MODEL"), device.get("ID_MODEL_FROM_DATABASE")) or "USB Device",
+                "type": "RFID",  # keep old value for server compatibility
+                "identifier": identifier,
             })
 
-    return devices
+    deduped = []
+    seen = set()
+    for d in devices:
+        identifier = d.get("identifier")
+        if not identifier or identifier in seen:
+            continue
+        seen.add(identifier)
+        deduped.append(d)
+
+    return deduped
 
 
 # -------------------------------
@@ -291,7 +343,7 @@ def main():
     # 🔁 Heartbeat loop
     while True:
         send_heartbeat(config)
-        time.sleep(30)
+        time.sleep(1800)
 
 
 if __name__ == "__main__":
