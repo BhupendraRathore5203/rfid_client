@@ -1,6 +1,6 @@
 from utils.security import generate_headers
 
-API_URL = "http://your-server.com/api/scan"
+API_URL = "http://10.153.137.102:8000/api/scan"
 
 
 def send_attendance(config, uid):

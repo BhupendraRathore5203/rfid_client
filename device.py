@@ -10,9 +10,9 @@ CONFIG_FILE = CONFIG_FILE_NAME
 
 BASE_URL = "http://10.153.137.102:8000/api"   # 🔥 CHANGE THIS
 
-REGISTER_API = f"{BASE_URL}/register-device"
-UPDATE_API = f"{BASE_URL}/update-device-info"
-HEARTBEAT_API = f"{BASE_URL}/heartbeat"
+REGISTER_API = f"{BASE_URL}/device/register-device"
+UPDATE_API = f"{BASE_URL}/device/update-device-info"
+HEARTBEAT_API = f"{BASE_URL}/device/heartbeat"
 
 
 # -------------------------------
