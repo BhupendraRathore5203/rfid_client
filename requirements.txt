@@ -1,0 +1,4 @@
+requests
+pyscard
+opencv-python
+numpy

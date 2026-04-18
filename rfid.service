@@ -1,0 +1,12 @@
+[Unit]
+Description=Idmitra Attendance Client
+After=network.target
+
+[Service]
+ExecStart=/home/pi/rfid-env/bin/python /home/pi/rfid-client/main.py
+WorkingDirectory=/home/pi/rfid-client
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
